@@ -1,0 +1,45 @@
+macro "Enhanced TIF to JPEG Converter with Scale Bar" {
+   // Prompt the user to select a folder
+   folder = getDirectory("Choose a folder");
+   
+   // Get a list of all files in the selected folder
+   list = getFileList(folder);
+   print(list.length);	
+
+   //Diolog box for user
+   Dialog.create("Automated Image Processing");
+   Dialog.addString("Scale per pixel?", "0.2167");
+   Dialog.addString("Size in microns of Scale Bar:", "10");
+   Dialog.show();
+
+   //Get user input
+   scale_factor=Dialog.getString();
+   scale_bar_size=Dialog.getString();
+   // Create a new folder to save the processed images
+   newFolder = folder + "Processed/";
+   File.makeDirectory(newFolder);
+
+   // Loop through each file in the list
+   for (i = 0; i < list.length; i++) {
+	   print(i);
+      // Check if the file has a .tif extension
+      if (endsWith(list[i], ".tif")) {
+
+         // Open the image
+         open(folder + list[i]);
+         run("Enhance Contrast", "saturated=0.35");
+         run("Set Scale...", "distance=1 known=" + scale_factor + " unit=microns");
+         run("Scale Bar...", "width="+ scale_bar_size+" height=4 font=32 color=White background=None location=[Lower Right] bold overlay");
+
+         // Add in a pause
+         wait(100);
+
+         // Save the processed image in the new folder
+         saveAs("Jpeg", newFolder + list[i] + ".jpg");
+         
+         // Close the image
+         close();
+
+      }
+   }
+}
